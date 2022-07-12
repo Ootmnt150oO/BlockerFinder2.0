@@ -1,0 +1,5 @@
+name: BlockFinderNK
+version: 2.0
+api: [1.0.8]
+author: YUZIOUO
+main: NWTW.BlockFinder.Loader
