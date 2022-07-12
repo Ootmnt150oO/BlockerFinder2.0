@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import cn.nukkit.block.Block;
 
@@ -25,7 +26,7 @@ public class Database {
 		      connection.setAutoCommit(true);
 		      loader.getLogger().alert("database連接成功");
 		    } catch ( Exception e ) {
-		    	e.printStackTrace();
+		    	loader.getLogger().alert(e.getMessage());
 		    }
 	}
 	public void disconnect() {
@@ -34,24 +35,27 @@ public class Database {
 			loader.getLogger().alert("database關閉");
 		} catch (SQLException exception) {
 			// TODO: handle exception
-			exception.printStackTrace();
+			loader.getLogger().alert(exception.getSQLState());
 		}
+	}
+	public boolean isConnect() {
+		return connection!=null;
 	}
 	public void createTable() {
 		try {
 			Statement stmt = connection.createStatement();
-			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS blockdata (id integer, name text, type integer, x integer, y integer, z integer, time text, level text)");
+			stmt.execute("CREATE TABLE IF NOT EXISTS blockdata (id integer, name text, type integer, x integer, y integer, z integer, time text, level text)");
 			loader.getLogger().alert("表格創建成功");
 			stmt.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loader.getLogger().alert(e.getSQLState());
 		}
 	}
 	public void insertData(BlockData data) {
 		PreparedStatement stmtStatement;
 		try {
-			stmtStatement = connection.prepareStatement("INSERT INTO blockdata (id,name,type,x,y,z,time,level)");
+			stmtStatement = connection.prepareStatement("INSERT INTO blockdata(id,name,type,x,y,z,time,level) VALUES (?,?,?,?,?,?,?,?)");
 			stmtStatement.setInt(1, data.getBlockid());
 		stmtStatement.setString(2, data.getPlayer());
 		stmtStatement.setInt(3, data.getType());
@@ -64,13 +68,13 @@ public class Database {
 		stmtStatement.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loader.getLogger().alert(e.getSQLState());
 		}
 	}
 	public ArrayList<BlockData> searchByLocation(Block block) {
 		ArrayList<BlockData> list = new ArrayList<BlockData>();
 		try {
-			ResultSet set = connection.createStatement().executeQuery("SELECT * FROM blockdata WHERE x = "+block.getFloorX()+", y = "+block.getFloorY()+", z = "+block.getFloorZ()+", level = "+block.getLevelName());
+			ResultSet set = connection.createStatement().executeQuery("SELECT * FROM blockdata WHERE x = "+block.getFloorX()+" AND y = "+block.getFloorY()+" AND z = "+block.getFloorZ()+" AND level = "+"'"+block.getLevelName()+"'");
 			while (set.next()) {
 				BlockData data = new BlockData();
 				data.setBlockid(set.getInt("id"));
@@ -83,14 +87,15 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loader.getLogger().alert(e.getMessage());
 		}
+		Collections.reverse(list);
 		return list;
 	}
 	public ArrayList<BlockData> searchByPlayer(String name) {
 		ArrayList<BlockData> list = new ArrayList<BlockData>();
 		try {
-			ResultSet set = connection.createStatement().executeQuery("SELECT * FROM blockdata WHERE name = "+name);
+			ResultSet set = connection.createStatement().executeQuery("SELECT * FROM blockdata WHERE name = '"+name+"'");
 			while (set.next()) {
 				BlockData data = new BlockData();
 				data.setBlockid(set.getInt("id"));
@@ -103,8 +108,9 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loader.getLogger().alert(e.getSQLState());
 		}
+		Collections.reverse(list);
 		return list;
 	}
 }

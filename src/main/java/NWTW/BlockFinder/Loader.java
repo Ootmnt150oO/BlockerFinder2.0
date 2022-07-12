@@ -32,6 +32,7 @@ public class Loader extends PluginBase{
 		database.createTable();
 		getServer().getPluginManager().registerEvents(new PlayerBehvavior(this), this);
 		getServer().getCommandMap().register("finder", new FinderCommand("finder","進入/退出調查模式"));
+		getServer().getCommandMap().register("search", new SearchCommand("search", "管理員查詢玩家破壞紀錄指令"));
 		super.onEnable();
 	}
 	@Override

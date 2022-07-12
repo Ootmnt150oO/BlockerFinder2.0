@@ -46,7 +46,8 @@ public class PlayerBehvavior implements Listener{
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void findMode(BlockBreakEvent event) {
 		if (FinderCommand.list.contains(event.getPlayer().getName())) {
-			FormControler.show(event.getPlayer(), Loader.database.searchByLocation(event.getBlock()));
+			Server.getInstance().getScheduler().scheduleAsyncTask(loader, new AsyncSearchTask(event.getBlock(), event.getPlayer()));
+			event.getPlayer().sendMessage("正在查詢請稍後......");
 			event.setCancelled(true);
 		}
 	}
