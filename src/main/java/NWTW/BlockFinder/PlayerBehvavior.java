@@ -8,14 +8,17 @@ import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntityChest;
-import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.block.BlockPlaceEvent;
-import cn.nukkit.event.inventory.InventoryMoveItemEvent;
+import cn.nukkit.event.inventory.InventoryTransactionEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.inventory.Inventory;
+import cn.nukkit.inventory.PlayerInventory;
+import cn.nukkit.inventory.transaction.InventoryTransaction;
+import cn.nukkit.inventory.transaction.action.InventoryAction;
 import cn.nukkit.item.Item;
 
 public class PlayerBehvavior implements Listener{
@@ -51,14 +54,17 @@ public class PlayerBehvavior implements Listener{
 		}
 	}
 	@EventHandler
-	public void onInventoryMoveItemEvent(InventoryMoveItemEvent event) {
-		if (event.getAction().equals(cn.nukkit.event.inventory.InventoryMoveItemEvent.Action.SLOT_CHANGE)) {
-			if(event.getInventory().getHolder() instanceof BlockEntityChest  chs && event.getTargetInventory().getHolder() instanceof EntityHuman human) {
-				Player player = Server.getInstance().getPlayer(human.getName()); 
-				Server.getInstance().getScheduler().scheduleAsyncTask(loader,new AsyncInsertTask(initData(player, player.getLevel().getBlock(chs.getFloorX(), chs.getFloorY(), chs.getFloorZ()), Action.Take,event.getItem())));
-			}else if (event.getInventory().getHolder() instanceof EntityHuman hum&& event.getTargetInventory().getHolder() instanceof BlockEntityChest  chs) {
-				Player player = Server.getInstance().getPlayer(hum.getName()); 
-				Server.getInstance().getScheduler().scheduleAsyncTask(loader,new AsyncInsertTask(initData(player, player.getLevel().getBlock(chs.getFloorX(), chs.getFloorY(), chs.getFloorZ()), Action.Put,event.getItem())));
+	public void onInventoryTransactionEvent(InventoryTransactionEvent event) {
+		InventoryTransaction transaction = event.getTransaction();
+		for(InventoryAction action: transaction.getActionList()) {
+			Item item = action.getSourceItem();
+			for(Inventory inventory : transaction.getInventories()) {
+				if(inventory.getHolder() instanceof BlockEntityChest chest) {
+					Server.getInstance().getScheduler().scheduleAsyncTask(loader,new AsyncInsertTask(initData(transaction.getSource(), transaction.getSource().getLevel().getBlock(chest.getFloorX(), chest.getFloorY(), chest.getFloorZ()), Action.Put,item)));
+				}else if (inventory instanceof PlayerInventory) {
+					//Server.getInstance().getScheduler().scheduleAsyncTask(loader,new AsyncInsertTask(initData(transaction.getSource(), transaction.getSource().getLevel().getBlock(chest.getFloorX(), chest.getFloorY(), chest.getFloorZ()), Action.Take,item)));
+					//拿出物品沒料
+				}
 			}
 		}
 	}
