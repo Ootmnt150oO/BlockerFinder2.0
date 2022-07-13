@@ -11,18 +11,24 @@ import cn.nukkit.item.Item;
 import cn.nukkit.utils.TextFormat;
 
 public class FormControler {
-	public static void show(Player player,ArrayList<BlockData> datas,ArrayList<ChestData> cdata) {
+	public static void show(Player player,ArrayList<BlockData> datas) {
 		StringBuilder builder = new StringBuilder();
-		if(datas.isEmpty()&&cdata.isEmpty()) builder.append("查無資料");
+		if(datas.isEmpty()) builder.append("查無資料");
 		for(BlockData data:datas) {
 			Block block = Block.get(data.getBlockid());
 			builder.append(data.getTime()).append(" 玩家:").append(TextFormat.BLUE).append(data.getPlayer()).append(" ").append(TextFormat.RED).append(type2String(data.getType())).append(TextFormat.WHITE).append(block.getName()).append("\n");
 		}
+		FormWindowSimple simple = new FormWindowSimple("方塊查詢系統", builder.toString());
+		player.showFormWindow(simple);
+	}
+	public static void showChest(Player player,ArrayList<ChestData> cdata) {
+		StringBuilder builder = new StringBuilder();
+		if (cdata.isEmpty()) builder.append("查無資料");
 		for(ChestData data: cdata) {
 			Item item = Item.get(data.getItem()[0],data.getItem()[1],data.getItem()[2]);
 			builder.append(data.getTime()).append(" 玩家:").append(TextFormat.BLUE).append(data.getPlayer()).append(" ").append(TextFormat.RED).append(type2String(data.getType())).append(TextFormat.WHITE).append(item.getName()).append(" ").append(data.getItemName()).append(" x").append(item.getCount()).append("\n");
 		}
-		FormWindowSimple simple = new FormWindowSimple("方塊查詢系統", builder.toString());
+		FormWindowSimple simple = new FormWindowSimple("箱子查詢系統", builder.toString());
 		player.showFormWindow(simple);
 	}
 	public static void showAdmin(Player player,ArrayList<BlockData> datas,ArrayList<ChestData> cdata) {
